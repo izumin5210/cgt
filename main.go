@@ -39,6 +39,8 @@ func run() error {
 var (
 	success = aurora.Green
 	fail    = aurora.Red
+	skipped = aurora.Brown
+	info    = aurora.Gray
 
 	c func(interface{}) aurora.Value
 )
@@ -48,10 +50,17 @@ func parse(line string) {
 	trimmed := strings.TrimSpace(line)
 
 	switch {
+	// start
 	case strings.HasPrefix(trimmed, "=== RUN"):
-		fallthrough
+		c = aurora.Bold
 	case strings.HasPrefix(trimmed, "?"):
 		c = nil
+
+	// info
+	case strings.HasPrefix(trimmed, "=== CONT"):
+		fallthrough
+	case strings.HasPrefix(trimmed, "=== PAUSE"):
+		c = info
 
 	// success
 	case strings.HasPrefix(trimmed, "--- PASS"):
@@ -66,6 +75,10 @@ func parse(line string) {
 		fallthrough
 	case strings.HasPrefix(trimmed, "FAIL"):
 		c = fail
+
+	// skipped
+	case strings.HasPrefix(trimmed, "--- SKIP"):
+		c = skipped
 	}
 
 	if c == nil {
